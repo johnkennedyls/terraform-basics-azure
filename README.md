@@ -54,9 +54,6 @@ azure-functions/
 
 azure-vm/
 ├── main.tf         # Configuración principal de la máquina virtual
-├── variables.tf    # Definición de variables
-├── outputs.tf      # Definición de outputs
-├── providers.tf    # Configuración del proveedor de Azure
 ```
 
 ## Despliegue de la Azure Function App
