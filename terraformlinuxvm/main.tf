@@ -1,7 +1,7 @@
 # Definición del provider que ocuparemos
 provider "azurerm" {
   features {}
-  subscription_id = "2f04ea2a-6146-4799-984c-d5f971c91b16"
+  subscription_id = "dd86b434-d49a-4f54-83f4-3dab86f71b30"
 }
 
 resource "azurerm_resource_group" "miprimeravmrg" {
@@ -32,6 +32,7 @@ resource "azurerm_network_interface" "miprimeravmnic" {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.miprimeravmsubnet.id
     private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.miprimeravmpublicip.id
   }
 }
 
@@ -59,4 +60,34 @@ resource "azurerm_linux_virtual_machine" "miprimeravm" {
   }
   disable_password_authentication = false
   provision_vm_agent              = true
+}
+
+resource "azurerm_network_security_group" "miprimeravmnsg" {
+  name                = "miprimeravmnsg"
+  location            = azurerm_resource_group.miprimeravmrg.location
+  resource_group_name = azurerm_resource_group.miprimeravmrg.name
+
+  security_rule {
+    name                       = "ssh_rule"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+}
+
+resource "azurerm_network_interface_security_group_association" "miprimeravmnicnsg" {
+  network_interface_id      = azurerm_network_interface.miprimeravmnic.id
+  network_security_group_id = azurerm_network_security_group.miprimeravmnsg.id
+}
+
+resource "azurerm_public_ip" "miprimeravmpublicip" {
+  name                = "miprimeravmpublicip"
+  location            = azurerm_resource_group.miprimeravmrg.location
+  resource_group_name = azurerm_resource_group.miprimeravmrg.name
+  allocation_method   = "Static"
 }
